@@ -10,11 +10,23 @@ const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 const FOCAL_LENGTH: f64 = 1.0;
 
 fn ray_color(ray: &Ray) -> Vec3 {
-    Vec3 {
-        x: 0.0,
-        y: 0.0,
-        z: 0.0,
-    }
+    let white = Vec3 {
+        x: 1.0,
+        y: 1.0,
+        z: 1.0,
+    };
+
+    let blue = Vec3 {
+        x: 0.5,
+        y: 0.7,
+        z: 1.0,
+    };
+
+    let unit_direction = ray.direction.unit();
+
+    let height_ratio = (unit_direction.y + 1.0) / 2.0;
+
+    ((1.0 - height_ratio) * blue + (height_ratio) * white) * 255.0
 }
 
 fn main() {
@@ -42,7 +54,7 @@ fn main() {
     let viewport_upperleft_location = Vec3 {
         x: -VIEWPORT_WIDTH / 2.0,
         y: VIEWPORT_HEIGHT / 2.0,
-        z: FOCAL_LENGTH,
+        z: -FOCAL_LENGTH,
     };
 
     let first_pixel_location =

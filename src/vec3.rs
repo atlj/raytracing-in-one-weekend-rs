@@ -15,6 +15,10 @@ impl Vec3 {
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
+
+    pub fn unit(&self) -> Vec3 {
+        *self / self.length()
+    }
 }
 
 impl Into<Rgb<u8>> for Vec3 {
