@@ -43,6 +43,18 @@ impl std::ops::Add for Vec3 {
     }
 }
 
+impl std::ops::Add<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: f64) -> Self::Output {
+        Vec3 {
+            x: self.x + rhs,
+            y: self.y + rhs,
+            z: self.z + rhs,
+        }
+    }
+}
+
 impl std::ops::Neg for Vec3 {
     type Output = Self;
 

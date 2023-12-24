@@ -9,29 +9,35 @@ const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
-fn hit_sphere(sphere_center: Vec3, sphere_radius: f64, ray: &Ray) -> bool {
+fn hit_sphere(sphere_center: Vec3, sphere_radius: f64, ray: &Ray) -> Option<f64> {
     let camera_to_sphere = ray.origin - sphere_center;
     let a = ray.direction.dot(ray.direction);
     let b = camera_to_sphere.dot(ray.direction) * 2.0;
     let c = camera_to_sphere.dot(camera_to_sphere) - sphere_radius * sphere_radius;
 
     let discriminant = b * b - 4.0 * a * c;
-    return discriminant >= 0.0;
+
+    if discriminant < 0.0 {
+        return None;
+    }
+
+    return Some((-b - discriminant.sqrt()) / (2.0 * a));
 }
 
 fn ray_color(ray: &Ray) -> Vec3 {
     let sphere_center = Vec3 {
         x: 0.0,
         y: 0.0,
-        z: FOCAL_LENGTH * -1.2,
+        z: FOCAL_LENGTH * 1.0,
     };
 
-    if hit_sphere(sphere_center, 0.5, ray) {
-        return Vec3 {
-            x: 255.0,
-            y: 0.0,
-            z: 0.0,
-        };
+    if let Some(multiplier) = hit_sphere(sphere_center, 0.5, ray) {
+        let intersection_point = ray.at(multiplier);
+        let normal = intersection_point - sphere_center;
+
+        let normal_unit = normal.unit();
+
+        return (normal_unit + 1.0) * 255.0 / 2.0;
     }
 
     let white = Vec3 {
