@@ -19,6 +19,10 @@ impl Vec3 {
     pub fn unit(&self) -> Vec3 {
         *self / self.length()
     }
+
+    pub fn dot(&self, rhs: Vec3) -> f64 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
 }
 
 impl Into<Rgb<u8>> for Vec3 {
