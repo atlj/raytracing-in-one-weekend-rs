@@ -1,6 +1,6 @@
 use image::Rgb;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -71,7 +71,7 @@ impl std::ops::Sub for Vec3 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        (-self) + rhs
+        self + (-rhs)
     }
 }
 
@@ -104,5 +104,27 @@ impl std::ops::Mul<Vec3> for f64 {
 
     fn mul(self, rhs: Vec3) -> Self::Output {
         rhs * self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::vec3::Vec3;
+
+    #[test]
+    fn test_unit() {
+        assert_eq!(
+            Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0
+            }
+            .unit(),
+            Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0
+            }
+        );
     }
 }

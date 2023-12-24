@@ -28,7 +28,7 @@ fn ray_color(ray: &Ray) -> Vec3 {
     let sphere_center = Vec3 {
         x: 0.0,
         y: 0.0,
-        z: FOCAL_LENGTH * 1.0,
+        z: FOCAL_LENGTH * -1.0,
     };
 
     if let Some(multiplier) = hit_sphere(sphere_center, 0.5, ray) {
@@ -37,7 +37,7 @@ fn ray_color(ray: &Ray) -> Vec3 {
 
         let normal_unit = normal.unit();
 
-        return (normal_unit + 1.0) * 255.0 / 2.0;
+        return ((normal_unit + 1.0) / 2.0) * 255.0;
     }
 
     let white = Vec3 {
@@ -56,7 +56,7 @@ fn ray_color(ray: &Ray) -> Vec3 {
 
     let height_ratio = (unit_direction.y + 1.0) / 2.0;
 
-    ((1.0 - height_ratio) * blue + (height_ratio) * white) * 255.0
+    ((1.0 - height_ratio) * white + (height_ratio) * blue) * 255.0
 }
 
 fn main() {
