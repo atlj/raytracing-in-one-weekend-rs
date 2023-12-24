@@ -47,6 +47,14 @@ impl std::ops::Neg for Vec3 {
     }
 }
 
+impl std::ops::Sub for Vec3 {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        (-self) + rhs
+    }
+}
+
 impl std::ops::Mul<f64> for Vec3 {
     type Output = Vec3;
 
@@ -68,5 +76,13 @@ impl std::ops::Div<f64> for Vec3 {
             y: self.y / rhs,
             z: self.z / rhs,
         }
+    }
+}
+
+impl std::ops::Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        rhs * self
     }
 }
