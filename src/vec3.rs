@@ -1,3 +1,5 @@
+use std::iter::Sum;
+
 use image::Rgb;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -104,6 +106,22 @@ impl std::ops::Mul<Vec3> for f64 {
 
     fn mul(self, rhs: Vec3) -> Self::Output {
         rhs * self
+    }
+}
+
+impl Sum for Vec3 {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        let mut acc = Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        };
+
+        for item in iter {
+            acc = acc + item
+        }
+
+        acc
     }
 }
 

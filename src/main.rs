@@ -1,4 +1,5 @@
 use image::RgbImage;
+use rand::{rngs::SmallRng, Rng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     hittable::{Hittable, Sphere},
     ray::Ray,
@@ -10,6 +11,8 @@ const HEIGHT: u32 = 600;
 
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
+
+const SAMPLE_COUNT: i32 = 50;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
@@ -24,6 +27,8 @@ const COLOR_BLUE: Vec3 = Vec3 {
     y: 0.7,
     z: 1.0,
 };
+
+const SEED: u64 = 31;
 
 type HittableVector = Vec<Box<dyn Hittable>>;
 
@@ -45,6 +50,8 @@ fn ray_color(ray: &Ray, hittables: &HittableVector) -> Vec3 {
 }
 
 fn main() {
+    let mut rng = SmallRng::seed_from_u64(SEED);
+
     let camera_center = Vec3 {
         x: 0.0,
         y: 0.0,
@@ -113,17 +120,36 @@ fn main() {
     ];
 
     for (x, y, color) in img.enumerate_pixels_mut() {
-        let pixel_location = first_pixel_location
+        let pixel_center = first_pixel_location
             + x as f64 * pixel_delta_horizontal
             + y as f64 * pixel_delta_vertical;
 
-        let ray_direction = pixel_location - camera_center;
-        let ray = Ray {
-            origin: camera_center,
-            direction: ray_direction,
-        };
+        let random_rays: Vec<Ray> = (0..SAMPLE_COUNT)
+            .map(|_| {
+                let random_x_offset = pixel_delta_horizontal.x * (rng.gen_range(-0.5..=0.5) as f64);
+                let random_y_offset = pixel_delta_vertical.y * (rng.gen_range(-0.5..=0.5) as f64);
 
-        *color = ray_color(&ray, &hittables).into();
+                let random_pixel_location = Vec3 {
+                    x: pixel_center.x + random_x_offset,
+                    y: pixel_center.y + random_y_offset,
+                    z: pixel_center.z,
+                };
+
+                let ray_direction = random_pixel_location - camera_center;
+
+                Ray {
+                    origin: camera_center,
+                    direction: ray_direction,
+                }
+            })
+            .collect();
+
+        let sum_of_samples: Vec3 = random_rays
+            .iter()
+            .map(|ray| ray_color(&ray, &hittables))
+            .sum();
+
+        *color = (sum_of_samples / (SAMPLE_COUNT as f64)).into();
     }
 
     img.save("output.png").unwrap();
