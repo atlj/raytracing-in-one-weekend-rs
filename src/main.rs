@@ -66,7 +66,7 @@ fn ray_color(
     if let Some(closest_hit_record) = closest_hit_record {
         // return (closest_hit_record.normal + COLOR_WHITE) / 2.0;
 
-        let direction = Vec3::random_on_hemisphere(closest_hit_record.normal, rng);
+        let direction = closest_hit_record.normal + Vec3::random_unit_vector(rng);
 
         return 0.5
             * ray_color(
