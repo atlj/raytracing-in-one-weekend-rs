@@ -1,4 +1,10 @@
+use std::io::{stderr, IsTerminal};
+
 use image::RgbImage;
+use kdam::{
+    term::{self, Colorizer},
+    tqdm, BarExt, Column, RichProgress, Spinner,
+};
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     hittable::{Hittable, Sphere},
@@ -15,6 +21,8 @@ const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 const SAMPLE_COUNT: i32 = 50;
 
 const FOCAL_LENGTH: f64 = 1.0;
+
+const TOTAL_RAYS: usize = WIDTH as usize * HEIGHT as usize * SAMPLE_COUNT as usize;
 
 const COLOR_WHITE: Vec3 = Vec3 {
     x: 1.0,
@@ -51,6 +59,30 @@ fn ray_color(ray: &Ray, hittables: &HittableVector) -> Vec3 {
 
 fn main() {
     let mut rng = SmallRng::seed_from_u64(SEED);
+    term::init(stderr().is_terminal());
+    let _ = term::hide_cursor();
+
+    let mut progress_bar = RichProgress::new(
+        tqdm!(total = TOTAL_RAYS, unit_scale = true, unit = "rays"),
+        vec![
+            Column::Spinner(Spinner::new(
+                &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
+                80.0,
+                1.0,
+            )),
+            Column::Animation,
+            Column::Percentage(1),
+            Column::Text("•".to_owned()),
+            Column::CountTotal,
+            Column::Text("•".to_owned()),
+            Column::Rate,
+            Column::Text("•".to_owned()),
+            Column::RemainingTime,
+        ],
+    );
+    let mut processed_ray_count: usize = 0;
+
+    let _ = progress_bar.write("Rendering...".colorize("bold yellow"));
 
     let camera_center = Vec3 {
         x: 0.0,
@@ -146,11 +178,18 @@ fn main() {
 
         let sum_of_samples: Vec3 = random_rays
             .iter()
-            .map(|ray| ray_color(&ray, &hittables))
+            .map(|ray| {
+                processed_ray_count += 1;
+
+                let _ = progress_bar.update_to(processed_ray_count);
+                ray_color(&ray, &hittables)
+            })
             .sum();
 
         *color = (sum_of_samples / (SAMPLE_COUNT as f64)).into();
     }
+
+    let _ = progress_bar.write("Render completed".colorize("bold green"));
 
     img.save("output.png").unwrap();
 }
