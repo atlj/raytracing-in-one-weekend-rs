@@ -13,6 +13,18 @@ const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
+const COLOR_WHITE: Vec3 = Vec3 {
+    x: 1.0,
+    y: 1.0,
+    z: 1.0,
+};
+
+const COLOR_BLUE: Vec3 = Vec3 {
+    x: 0.5,
+    y: 0.7,
+    z: 1.0,
+};
+
 type HittableVector = Vec<Box<dyn Hittable>>;
 
 fn ray_color(ray: &Ray, hittables: &HittableVector) -> Vec3 {
@@ -25,23 +37,11 @@ fn ray_color(ray: &Ray, hittables: &HittableVector) -> Vec3 {
         return ((closest_hit_record.normal + 1.0) / 2.0) * 255.0;
     }
 
-    let white = Vec3 {
-        x: 1.0,
-        y: 1.0,
-        z: 1.0,
-    };
-
-    let blue = Vec3 {
-        x: 0.5,
-        y: 0.7,
-        z: 1.0,
-    };
-
     let unit_direction = ray.direction.unit();
 
     let height_ratio = (unit_direction.y + 1.0) / 2.0;
 
-    ((1.0 - height_ratio) * white + (height_ratio) * blue) * 255.0
+    ((1.0 - height_ratio) * COLOR_WHITE + (height_ratio) * COLOR_BLUE) * 255.0
 }
 
 fn main() {
