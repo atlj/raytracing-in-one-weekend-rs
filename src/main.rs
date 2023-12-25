@@ -48,6 +48,10 @@ const REFLECTION_LIMIT: usize = 50;
 
 type HittableVector = Vec<Box<dyn Hittable>>;
 
+fn linear_to_gamma(color: f64) -> f64 {
+    color.sqrt()
+}
+
 fn ray_color(
     ray: &Ray,
     hittables: &HittableVector,
@@ -200,7 +204,15 @@ fn main() {
             })
             .sum();
 
-        *color = ((sum_of_samples * 255.0) / (SAMPLE_COUNT as f64)).into();
+        let mean_color = (sum_of_samples) / (SAMPLE_COUNT as f64);
+
+        let gamma_corrected_color = Vec3 {
+            x: linear_to_gamma(mean_color.x),
+            y: linear_to_gamma(mean_color.y),
+            z: linear_to_gamma(mean_color.z),
+        };
+
+        *color = (gamma_corrected_color * 255.0).into()
     }
 
     let _ = progress_bar.write("Render completed".colorize("bold green"));
