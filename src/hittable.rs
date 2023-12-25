@@ -37,11 +37,14 @@ impl Hittable for Sphere {
         let discriminant_sqrted = discriminant.sqrt();
 
         let root_1 = (-half_b - discriminant_sqrted) / a;
+        let root_2 = (-half_b + discriminant_sqrted) / a;
 
         let root = if root_1 >= minimum_multiplier && root_1 <= maximum_multiplier {
             root_1
+        } else if root_2 >= minimum_multiplier && root_2 <= maximum_multiplier {
+            root_2
         } else {
-            (-half_b + discriminant_sqrted) / a
+            return None;
         };
 
         let position = ray.at(root);

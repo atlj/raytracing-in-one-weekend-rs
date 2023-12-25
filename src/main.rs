@@ -82,7 +82,7 @@ fn main() {
             center_position: Vec3 {
                 x: 0.0,
                 y: 0.0,
-                z: FOCAL_LENGTH * -0.9,
+                z: -1.0,
             },
             radius: 0.5,
         }),
@@ -90,7 +90,7 @@ fn main() {
             center_position: Vec3 {
                 x: 1.0,
                 y: 0.0,
-                z: FOCAL_LENGTH * -1.0,
+                z: -1.0,
             },
             radius: 0.5,
         }),
@@ -98,9 +98,17 @@ fn main() {
             center_position: Vec3 {
                 x: -1.0,
                 y: 0.0,
-                z: FOCAL_LENGTH * -1.0,
+                z: -1.0,
             },
             radius: 0.5,
+        }),
+        Box::new(Sphere {
+            center_position: Vec3 {
+                x: 0.0,
+                y: -100.5,
+                z: -1.0,
+            },
+            radius: 100.0,
         }),
     ];
 
