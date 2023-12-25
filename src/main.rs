@@ -1,5 +1,9 @@
 use image::RgbImage;
-use raytracing_in_one_weekend_rust::{ray::Ray, vec3::Vec3};
+use raytracing_in_one_weekend_rust::{
+    hittable::{Hittable, Sphere},
+    ray::Ray,
+    vec3::Vec3,
+};
 
 const WIDTH: u32 = 800;
 const HEIGHT: u32 = 600;
@@ -9,35 +13,18 @@ const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
-fn hit_sphere(sphere_center: Vec3, sphere_radius: f64, ray: &Ray) -> Option<f64> {
-    let camera_to_sphere = ray.origin - sphere_center;
-    let a = ray.direction.length_squared();
-    let half_b = camera_to_sphere.dot(ray.direction);
-    let c = camera_to_sphere.length_squared() - sphere_radius * sphere_radius;
-
-    let discriminant = half_b * half_b - a * c;
-
-    if discriminant < 0.0 {
-        return None;
-    }
-
-    return Some((-half_b - discriminant.sqrt()) / (a));
-}
-
 fn ray_color(ray: &Ray) -> Vec3 {
-    let sphere_center = Vec3 {
-        x: 0.0,
-        y: 0.0,
-        z: FOCAL_LENGTH * -1.0,
+    let sphere = Sphere {
+        center_position: Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: FOCAL_LENGTH * -1.0,
+        },
+        radius: 0.5,
     };
 
-    if let Some(multiplier) = hit_sphere(sphere_center, 0.5, ray) {
-        let intersection_point = ray.at(multiplier);
-        let normal = intersection_point - sphere_center;
-
-        let normal_unit = normal.unit();
-
-        return ((normal_unit + 1.0) / 2.0) * 255.0;
+    if let Some(hit_record) = sphere.hit(ray, 0.0, f64::MAX) {
+        return ((hit_record.normal + 1.0) / 2.0) * 255.0;
     }
 
     let white = Vec3 {
