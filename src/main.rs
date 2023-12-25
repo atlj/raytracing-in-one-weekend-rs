@@ -8,6 +8,7 @@ use kdam::{
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     hittable::{Hittable, Sphere},
+    material::{DiffuseMaterial, Material},
     ray::Ray,
     vec3::Vec3,
 };
@@ -70,18 +71,11 @@ fn ray_color(
     if let Some(closest_hit_record) = closest_hit_record {
         // return (closest_hit_record.normal + COLOR_WHITE) / 2.0;
 
-        let direction = closest_hit_record.normal + Vec3::random_unit_vector(rng);
-
-        return 0.5
-            * ray_color(
-                &Ray {
-                    origin: closest_hit_record.position,
-                    direction,
-                },
-                hittables,
-                reflection_count + 1,
-                rng,
-            );
+        if let Some((attenuation, reflected_ray)) =
+            DiffuseMaterial::scatter(&ray, &closest_hit_record, rng)
+        {
+            return attenuation * ray_color(&reflected_ray, hittables, reflection_count + 1, rng);
+        }
     }
 
     let unit_direction = ray.direction.unit();
