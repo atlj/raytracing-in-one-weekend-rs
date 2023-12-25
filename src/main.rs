@@ -30,7 +30,7 @@ type HittableVector = Vec<Box<dyn Hittable>>;
 fn ray_color(ray: &Ray, hittables: &HittableVector) -> Vec3 {
     let closest_hit_record = hittables
         .iter()
-        .flat_map(|hittable| hittable.hit(ray, 0.0, f64::MAX))
+        .flat_map(|hittable| hittable.hit(ray, 0.0, f64::INFINITY))
         .min_by_key(|hit_record| hit_record.multiplier as i64);
 
     if let Some(closest_hit_record) = closest_hit_record {
