@@ -1,6 +1,6 @@
-use std::ops::RangeInclusive;
+use std::{ops::RangeInclusive, rc::Rc};
 
-use crate::{ray::Ray, vec3::Vec3};
+use crate::{material::Material, ray::Ray, vec3::Vec3};
 
 pub struct HitRecord {
     pub position: Vec3,
@@ -11,11 +11,14 @@ pub struct HitRecord {
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, multiplier_range: RangeInclusive<f64>) -> Option<HitRecord>;
+
+    fn material(&self) -> &Rc<dyn Material>;
 }
 
 pub struct Sphere {
     pub center_position: Vec3,
     pub radius: f64,
+    pub mat: Rc<dyn Material>,
 }
 
 impl Hittable for Sphere {
@@ -59,5 +62,9 @@ impl Hittable for Sphere {
             did_hit_front_face,
         };
         return Some(hit_record);
+    }
+
+    fn material(&self) -> &Rc<dyn Material> {
+        &self.mat
     }
 }

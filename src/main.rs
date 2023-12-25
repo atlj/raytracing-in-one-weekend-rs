@@ -1,4 +1,7 @@
-use std::io::{stderr, IsTerminal};
+use std::{
+    io::{stderr, IsTerminal},
+    rc::Rc,
+};
 
 use image::RgbImage;
 use kdam::{
@@ -8,7 +11,7 @@ use kdam::{
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     hittable::{Hittable, Sphere},
-    material::{DiffuseMaterial, Material},
+    material::DiffuseMaterial,
     ray::Ray,
     vec3::Vec3,
 };
@@ -63,16 +66,17 @@ fn ray_color(
         return COLOR_BLACK;
     };
 
-    let closest_hit_record = hittables
+    if let Some((hittable_index, closest_hit_record)) = hittables
         .iter()
         .flat_map(|hittable| hittable.hit(ray, 0.001..=f64::INFINITY))
-        .min_by_key(|hit_record| hit_record.multiplier as i64);
-
-    if let Some(closest_hit_record) = closest_hit_record {
+        .enumerate()
+        .min_by_key(|(_, hit_record)| hit_record.multiplier as i64)
+    {
         // return (closest_hit_record.normal + COLOR_WHITE) / 2.0;
 
-        if let Some((attenuation, reflected_ray)) =
-            DiffuseMaterial::scatter(&ray, &closest_hit_record, rng)
+        let material = hittables[hittable_index].material();
+
+        if let Some((attenuation, reflected_ray)) = material.scatter(&ray, &closest_hit_record, rng)
         {
             return attenuation * ray_color(&reflected_ray, hittables, reflection_count + 1, rng);
         }
@@ -144,6 +148,8 @@ fn main() {
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
+    let diffuse_material = Rc::new(DiffuseMaterial {});
+
     let hittables: HittableVector = vec![
         Box::new(Sphere {
             center_position: Vec3 {
@@ -152,6 +158,7 @@ fn main() {
                 z: -1.0,
             },
             radius: 0.5,
+            mat: diffuse_material.clone(),
         }),
         Box::new(Sphere {
             center_position: Vec3 {
@@ -160,6 +167,7 @@ fn main() {
                 z: -1.0,
             },
             radius: 100.0,
+            mat: diffuse_material.clone(),
         }),
     ];
 
