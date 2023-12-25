@@ -12,13 +12,13 @@ use raytracing_in_one_weekend_rust::{
     vec3::Vec3,
 };
 
-const WIDTH: u32 = 400;
-const HEIGHT: u32 = 225;
+const WIDTH: u32 = 800;
+const HEIGHT: u32 = 600;
 
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 
-const SAMPLE_COUNT: i32 = 20;
+const SAMPLE_COUNT: i32 = 40;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
@@ -44,7 +44,7 @@ const COLOR_BLACK: Vec3 = Vec3 {
 
 const SEED: u64 = 32420;
 
-const REFLECTION_LIMIT: usize = 40;
+const REFLECTION_LIMIT: usize = 50;
 
 type HittableVector = Vec<Box<dyn Hittable>>;
 
@@ -60,10 +60,12 @@ fn ray_color(
 
     let closest_hit_record = hittables
         .iter()
-        .flat_map(|hittable| hittable.hit(ray, 0.0..=f64::INFINITY))
+        .flat_map(|hittable| hittable.hit(ray, 0.001..=f64::INFINITY))
         .min_by_key(|hit_record| hit_record.multiplier as i64);
 
     if let Some(closest_hit_record) = closest_hit_record {
+        // return (closest_hit_record.normal + COLOR_WHITE) / 2.0;
+
         let direction = Vec3::random_on_hemisphere(closest_hit_record.normal, rng);
 
         return 0.5
