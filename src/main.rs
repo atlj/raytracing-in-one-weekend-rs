@@ -11,17 +11,17 @@ const FOCAL_LENGTH: f64 = 1.0;
 
 fn hit_sphere(sphere_center: Vec3, sphere_radius: f64, ray: &Ray) -> Option<f64> {
     let camera_to_sphere = ray.origin - sphere_center;
-    let a = ray.direction.dot(ray.direction);
-    let b = camera_to_sphere.dot(ray.direction) * 2.0;
-    let c = camera_to_sphere.dot(camera_to_sphere) - sphere_radius * sphere_radius;
+    let a = ray.direction.length_squared();
+    let half_b = camera_to_sphere.dot(ray.direction);
+    let c = camera_to_sphere.length_squared() - sphere_radius * sphere_radius;
 
-    let discriminant = b * b - 4.0 * a * c;
+    let discriminant = half_b * half_b - a * c;
 
     if discriminant < 0.0 {
         return None;
     }
 
-    return Some((-b - discriminant.sqrt()) / (2.0 * a));
+    return Some((-half_b - discriminant.sqrt()) / (a));
 }
 
 fn ray_color(ray: &Ray) -> Vec3 {
