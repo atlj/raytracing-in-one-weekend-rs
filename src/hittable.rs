@@ -1,3 +1,5 @@
+use std::ops::RangeInclusive;
+
 use crate::{ray::Ray, vec3::Vec3};
 
 pub struct HitRecord {
@@ -8,8 +10,7 @@ pub struct HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, minimum_multiplier: f64, maximum_multiplier: f64)
-        -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, multiplier_range: RangeInclusive<f64>) -> Option<HitRecord>;
 }
 
 pub struct Sphere {
@@ -18,12 +19,7 @@ pub struct Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(
-        &self,
-        ray: &Ray,
-        minimum_multiplier: f64,
-        maximum_multiplier: f64,
-    ) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, multiplier_range: RangeInclusive<f64>) -> Option<HitRecord> {
         let camera_to_sphere = ray.origin - self.center_position;
         let a = ray.direction.length_squared();
         let half_b = camera_to_sphere.dot(ray.direction);
@@ -39,9 +35,9 @@ impl Hittable for Sphere {
         let root_1 = (-half_b - discriminant_sqrted) / a;
         let root_2 = (-half_b + discriminant_sqrted) / a;
 
-        let root = if root_1 >= minimum_multiplier && root_1 <= maximum_multiplier {
+        let root = if multiplier_range.contains(&root_1) {
             root_1
-        } else if root_2 >= minimum_multiplier && root_2 <= maximum_multiplier {
+        } else if multiplier_range.contains(&root_2) {
             root_2
         } else {
             return None;
