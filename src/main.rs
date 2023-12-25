@@ -11,18 +11,18 @@ use kdam::{
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     hittable::{Hittable, Sphere},
-    material::Lambertian,
+    material::{Glossy, Lambertian},
     ray::Ray,
     vec3::Vec3,
 };
 
-const WIDTH: u32 = 800;
-const HEIGHT: u32 = 600;
+const WIDTH: u32 = 400;
+const HEIGHT: u32 = 225;
 
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 
-const SAMPLE_COUNT: i32 = 40;
+const SAMPLE_COUNT: i32 = 50;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
@@ -48,7 +48,7 @@ const COLOR_BLACK: Vec3 = Vec3 {
 
 const SEED: u64 = 32420;
 
-const REFLECTION_LIMIT: usize = 50;
+const REFLECTION_LIMIT: usize = 40;
 
 type HittableVector = Vec<Box<dyn Hittable>>;
 
@@ -68,8 +68,8 @@ fn ray_color(
 
     if let Some((hittable_index, closest_hit_record)) = hittables
         .iter()
-        .flat_map(|hittable| hittable.hit(ray, 0.001..=f64::INFINITY))
         .enumerate()
+        .flat_map(|(index, hittable)| Some((index, hittable.hit(ray, 0.001..=f64::INFINITY)?)))
         .min_by_key(|(_, hit_record)| hit_record.multiplier as i64)
     {
         // return (closest_hit_record.normal + COLOR_WHITE) / 2.0;
@@ -148,12 +148,38 @@ fn main() {
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
-    let diffuse_material = Rc::new(Lambertian {
+    let ground_material = Rc::new(Lambertian {
         albedo: Vec3 {
-            x: 0.5,
-            y: 0.5,
-            z: 0.5,
+            x: 0.8,
+            y: 0.8,
+            z: 0.0,
         },
+    });
+
+    let pink_material = Rc::new(Lambertian {
+        albedo: Vec3 {
+            x: 0.7,
+            y: 0.3,
+            z: 0.3,
+        },
+    });
+
+    let gold_material = Rc::new(Glossy {
+        albedo: Vec3 {
+            x: 0.8,
+            y: 0.6,
+            z: 0.2,
+        },
+        rougness: 0.1,
+    });
+
+    let mirror_material = Rc::new(Glossy {
+        albedo: Vec3 {
+            x: 0.8,
+            y: 0.8,
+            z: 0.8,
+        },
+        rougness: 0.02,
     });
 
     let hittables: HittableVector = vec![
@@ -161,10 +187,28 @@ fn main() {
             center_position: Vec3 {
                 x: 0.0,
                 y: 0.0,
-                z: -1.0,
+                z: -1.3,
             },
             radius: 0.5,
-            mat: diffuse_material.clone(),
+            mat: pink_material.clone(),
+        }),
+        Box::new(Sphere {
+            center_position: Vec3 {
+                x: -1.0,
+                y: 0.0,
+                z: -0.8,
+            },
+            radius: 0.5,
+            mat: gold_material.clone(),
+        }),
+        Box::new(Sphere {
+            center_position: Vec3 {
+                x: 1.3,
+                y: 0.3,
+                z: -1.0,
+            },
+            radius: 0.8,
+            mat: mirror_material.clone(),
         }),
         Box::new(Sphere {
             center_position: Vec3 {
@@ -173,7 +217,7 @@ fn main() {
                 z: -1.0,
             },
             radius: 100.0,
-            mat: diffuse_material.clone(),
+            mat: ground_material.clone(),
         }),
     ];
 

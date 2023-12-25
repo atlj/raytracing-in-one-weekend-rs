@@ -50,6 +50,10 @@ impl Vec3 {
             && self.z.abs() < really_small_number;
     }
 
+    pub fn reflect(&self, surface_normal: Vec3) -> Vec3 {
+        *self - self.dot(surface_normal) * 2.0 * surface_normal
+    }
+
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
