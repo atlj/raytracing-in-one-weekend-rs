@@ -13,18 +13,16 @@ const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
-fn ray_color(ray: &Ray) -> Vec3 {
-    let sphere = Sphere {
-        center_position: Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: FOCAL_LENGTH * -1.0,
-        },
-        radius: 0.5,
-    };
+type HittableVector = Vec<Box<dyn Hittable>>;
 
-    if let Some(hit_record) = sphere.hit(ray, 0.0, f64::MAX) {
-        return ((hit_record.normal + 1.0) / 2.0) * 255.0;
+fn ray_color(ray: &Ray, hittables: &HittableVector) -> Vec3 {
+    let closest_hit_record = hittables
+        .iter()
+        .flat_map(|hittable| hittable.hit(ray, 0.0, f64::MAX))
+        .min_by_key(|hit_record| hit_record.multiplier as i64);
+
+    if let Some(closest_hit_record) = closest_hit_record {
+        return ((closest_hit_record.normal + 1.0) / 2.0) * 255.0;
     }
 
     let white = Vec3 {
@@ -79,6 +77,33 @@ fn main() {
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
+    let hittables: HittableVector = vec![
+        Box::new(Sphere {
+            center_position: Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: FOCAL_LENGTH * -0.9,
+            },
+            radius: 0.5,
+        }),
+        Box::new(Sphere {
+            center_position: Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: FOCAL_LENGTH * -1.0,
+            },
+            radius: 0.5,
+        }),
+        Box::new(Sphere {
+            center_position: Vec3 {
+                x: -1.0,
+                y: 0.0,
+                z: FOCAL_LENGTH * -1.0,
+            },
+            radius: 0.5,
+        }),
+    ];
+
     for (x, y, color) in img.enumerate_pixels_mut() {
         let pixel_location = first_pixel_location
             + x as f64 * pixel_delta_horizontal
@@ -90,7 +115,7 @@ fn main() {
             direction: ray_direction,
         };
 
-        *color = ray_color(&ray).into();
+        *color = ray_color(&ray, &hittables).into();
     }
 
     img.save("output.png").unwrap();
