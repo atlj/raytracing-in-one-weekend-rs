@@ -1,6 +1,7 @@
-use std::iter::Sum;
+use std::{iter::Sum, ops::RangeInclusive};
 
 use image::Rgb;
+use rand::{rngs::SmallRng, Rng};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
@@ -10,6 +11,38 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    pub fn random(range: RangeInclusive<f64>, rng: &mut SmallRng) -> Vec3 {
+        Vec3 {
+            x: rng.gen_range(range.clone()),
+            y: rng.gen_range(range.clone()),
+            z: rng.gen_range(range),
+        }
+    }
+
+    fn random_in_unit_sphere(rng: &mut SmallRng) -> Vec3 {
+        loop {
+            let random_vec = Vec3::random(-1.0..=1.0, rng);
+
+            if random_vec.length_squared() < 1.0 {
+                return random_vec;
+            }
+        }
+    }
+
+    pub fn random_unit_vector(rng: &mut SmallRng) -> Vec3 {
+        Vec3::random_in_unit_sphere(rng).unit()
+    }
+
+    pub fn random_on_hemisphere(normal: Vec3, rng: &mut SmallRng) -> Vec3 {
+        let in_unit_sphere = Vec3::random_in_unit_sphere(rng);
+
+        if in_unit_sphere.dot(normal) >= 0.0 {
+            in_unit_sphere
+        } else {
+            -in_unit_sphere
+        }
+    }
+
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }

@@ -12,13 +12,13 @@ use raytracing_in_one_weekend_rust::{
     vec3::Vec3,
 };
 
-const WIDTH: u32 = 800;
-const HEIGHT: u32 = 600;
+const WIDTH: u32 = 400;
+const HEIGHT: u32 = 225;
 
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const VIEWPORT_WIDTH: f64 = WIDTH as f64 / HEIGHT as f64 * VIEWPORT_HEIGHT;
 
-const SAMPLE_COUNT: i32 = 50;
+const SAMPLE_COUNT: i32 = 20;
 
 const FOCAL_LENGTH: f64 = 1.0;
 
@@ -36,25 +36,53 @@ const COLOR_BLUE: Vec3 = Vec3 {
     z: 1.0,
 };
 
-const SEED: u64 = 31;
+const COLOR_BLACK: Vec3 = Vec3 {
+    x: 0.0,
+    y: 0.0,
+    z: 0.0,
+};
+
+const SEED: u64 = 32420;
+
+const REFLECTION_LIMIT: usize = 40;
 
 type HittableVector = Vec<Box<dyn Hittable>>;
 
-fn ray_color(ray: &Ray, hittables: &HittableVector) -> Vec3 {
+fn ray_color(
+    ray: &Ray,
+    hittables: &HittableVector,
+    reflection_count: usize,
+    rng: &mut SmallRng,
+) -> Vec3 {
+    if reflection_count == REFLECTION_LIMIT {
+        return COLOR_BLACK;
+    };
+
     let closest_hit_record = hittables
         .iter()
         .flat_map(|hittable| hittable.hit(ray, 0.0..=f64::INFINITY))
         .min_by_key(|hit_record| hit_record.multiplier as i64);
 
     if let Some(closest_hit_record) = closest_hit_record {
-        return ((closest_hit_record.normal + 1.0) / 2.0) * 255.0;
+        let direction = Vec3::random_on_hemisphere(closest_hit_record.normal, rng);
+
+        return 0.5
+            * ray_color(
+                &Ray {
+                    origin: closest_hit_record.position,
+                    direction,
+                },
+                hittables,
+                reflection_count + 1,
+                rng,
+            );
     }
 
     let unit_direction = ray.direction.unit();
 
     let height_ratio = (unit_direction.y + 1.0) / 2.0;
 
-    ((1.0 - height_ratio) * COLOR_WHITE + (height_ratio) * COLOR_BLUE) * 255.0
+    (1.0 - height_ratio) * COLOR_WHITE + (height_ratio) * COLOR_BLUE
 }
 
 fn main() {
@@ -127,22 +155,6 @@ fn main() {
         }),
         Box::new(Sphere {
             center_position: Vec3 {
-                x: 1.0,
-                y: 0.0,
-                z: -1.0,
-            },
-            radius: 0.5,
-        }),
-        Box::new(Sphere {
-            center_position: Vec3 {
-                x: -1.0,
-                y: 0.0,
-                z: -1.0,
-            },
-            radius: 0.5,
-        }),
-        Box::new(Sphere {
-            center_position: Vec3 {
                 x: 0.0,
                 y: -100.5,
                 z: -1.0,
@@ -182,11 +194,11 @@ fn main() {
                 processed_ray_count += 1;
 
                 let _ = progress_bar.update_to(processed_ray_count);
-                ray_color(&ray, &hittables)
+                ray_color(&ray, &hittables, 0, &mut rng)
             })
             .sum();
 
-        *color = (sum_of_samples / (SAMPLE_COUNT as f64)).into();
+        *color = ((sum_of_samples * 255.0) / (SAMPLE_COUNT as f64)).into();
     }
 
     let _ = progress_bar.write("Render completed".colorize("bold green"));
