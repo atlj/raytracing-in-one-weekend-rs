@@ -4,6 +4,7 @@ pub struct HitRecord {
     pub position: Vec3,
     pub normal: Vec3,
     pub multiplier: f64,
+    pub did_hit_front_face: bool,
 }
 
 pub trait Hittable {
@@ -45,10 +46,18 @@ impl Hittable for Sphere {
 
         let position = ray.at(root);
 
+        let normal = (position - self.center_position) / self.radius;
+        let (calculated_normal, did_hit_front_face) = if ray.direction.dot(normal) > 0.0 {
+            (-normal, false)
+        } else {
+            (normal, true)
+        };
+
         let hit_record = HitRecord {
             multiplier: root,
             position,
-            normal: (position - self.center_position) / self.radius,
+            normal: calculated_normal,
+            did_hit_front_face,
         };
         return Some(hit_record);
     }
