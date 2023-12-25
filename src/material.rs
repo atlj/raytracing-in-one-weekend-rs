@@ -8,21 +8,27 @@ pub trait Material {
         incoming_ray: &Ray,
         hit_record: &HitRecord,
         rng: &mut SmallRng,
-    ) -> Option<(f64, Ray)>;
+    ) -> Option<(Vec3, Ray)>;
 }
 
 #[derive(Clone)]
-pub struct DiffuseMaterial;
+pub struct Lambertian {
+    pub albedo: Vec3,
+}
 
-impl Material for DiffuseMaterial {
-    fn scatter(&self, _: &Ray, hit_record: &HitRecord, rng: &mut SmallRng) -> Option<(f64, Ray)> {
+impl Material for Lambertian {
+    fn scatter(&self, _: &Ray, hit_record: &HitRecord, rng: &mut SmallRng) -> Option<(Vec3, Ray)> {
         let direction = hit_record.normal + Vec3::random_unit_vector(rng);
 
         let scattered_ray = Ray {
             origin: hit_record.position,
-            direction,
+            direction: if !direction.is_near_zero() {
+                direction
+            } else {
+                hit_record.normal
+            },
         };
 
-        Some((0.5, scattered_ray))
+        Some((self.albedo, scattered_ray))
     }
 }

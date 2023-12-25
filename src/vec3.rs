@@ -43,6 +43,13 @@ impl Vec3 {
         }
     }
 
+    pub fn is_near_zero(&self) -> bool {
+        let really_small_number = 1e-8;
+        return self.x.abs() < really_small_number
+            && self.y.abs() < really_small_number
+            && self.z.abs() < really_small_number;
+    }
+
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
@@ -139,6 +146,18 @@ impl std::ops::Mul<Vec3> for f64 {
 
     fn mul(self, rhs: Vec3) -> Self::Output {
         rhs * self
+    }
+}
+
+impl std::ops::Mul for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Vec3 {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
     }
 }
 

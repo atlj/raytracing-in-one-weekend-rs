@@ -11,7 +11,7 @@ use kdam::{
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     hittable::{Hittable, Sphere},
-    material::DiffuseMaterial,
+    material::Lambertian,
     ray::Ray,
     vec3::Vec3,
 };
@@ -148,7 +148,13 @@ fn main() {
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
-    let diffuse_material = Rc::new(DiffuseMaterial {});
+    let diffuse_material = Rc::new(Lambertian {
+        albedo: Vec3 {
+            x: 0.5,
+            y: 0.5,
+            z: 0.5,
+        },
+    });
 
     let hittables: HittableVector = vec![
         Box::new(Sphere {
