@@ -11,15 +11,18 @@ pub trait Material {
     ) -> Option<(Vec3, Ray)>;
 }
 
-#[derive(Clone)]
 pub struct Lambertian {
     pub albedo: Vec3,
 }
 
-#[derive(Clone)]
 pub struct Glossy {
     pub albedo: Vec3,
     pub rougness: f64,
+}
+
+pub struct Glass {
+    pub albedo: Vec3,
+    pub refractive_index: f64,
 }
 
 impl Material for Lambertian {
@@ -55,5 +58,31 @@ impl Material for Glossy {
         };
 
         return Some((self.albedo, reflected_ray));
+    }
+}
+
+impl Material for Glass {
+    fn scatter(
+        &self,
+        incoming_ray: &Ray,
+        hit_record: &HitRecord,
+        _: &mut SmallRng,
+    ) -> Option<(Vec3, Ray)> {
+        let refraction_ratio = if hit_record.did_hit_front_face {
+            1.0 / self.refractive_index
+        } else {
+            self.refractive_index
+        };
+
+        let direction_unit = incoming_ray.direction.unit();
+        let refracted_direction = direction_unit.refract(&hit_record.normal, refraction_ratio);
+
+        Some((
+            self.albedo,
+            Ray {
+                origin: hit_record.position,
+                direction: refracted_direction,
+            },
+        ))
     }
 }

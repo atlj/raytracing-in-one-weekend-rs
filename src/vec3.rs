@@ -54,6 +54,17 @@ impl Vec3 {
         *self - self.dot(surface_normal) * 2.0 * surface_normal
     }
 
+    pub fn refract(&self, normal: &Vec3, refractive_index: f64) -> Vec3 {
+        let cos_theta = f64::min((-*self).dot(*normal), 1.0);
+        let refracted_ray_perpendicular = refractive_index * (*self + cos_theta * *normal);
+        let refracted_ray_parallel = -((1.0 - refracted_ray_perpendicular.length_squared())
+            .abs()
+            .sqrt()
+            * *normal);
+
+        refracted_ray_perpendicular + refracted_ray_parallel
+    }
+
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }

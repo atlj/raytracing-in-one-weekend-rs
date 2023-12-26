@@ -11,7 +11,7 @@ use kdam::{
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     hittable::{Hittable, Sphere},
-    material::{Glossy, Lambertian},
+    material::{Glass, Glossy, Lambertian},
     ray::Ray,
     vec3::Vec3,
 };
@@ -182,6 +182,15 @@ fn main() {
         rougness: 0.02,
     });
 
+    let glass_material = Rc::new(Glass {
+        albedo: Vec3 {
+            x: 0.97,
+            y: 0.97,
+            z: 0.97,
+        },
+        refractive_index: 1.5,
+    });
+
     let hittables: HittableVector = vec![
         Box::new(Sphere {
             center_position: Vec3 {
@@ -194,11 +203,20 @@ fn main() {
         }),
         Box::new(Sphere {
             center_position: Vec3 {
-                x: -1.0,
-                y: 0.0,
+                x: -0.8,
+                y: -0.3,
                 z: -0.8,
             },
-            radius: 0.5,
+            radius: 0.2,
+            mat: glass_material.clone(),
+        }),
+        Box::new(Sphere {
+            center_position: Vec3 {
+                x: -2.5,
+                y: 0.3,
+                z: -2.5,
+            },
+            radius: 0.8,
             mat: gold_material.clone(),
         }),
         Box::new(Sphere {
