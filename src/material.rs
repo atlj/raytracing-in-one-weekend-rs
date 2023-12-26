@@ -66,7 +66,7 @@ impl Material for Glass {
         &self,
         incoming_ray: &Ray,
         hit_record: &HitRecord,
-        _: &mut SmallRng,
+        rng: &mut SmallRng,
     ) -> Option<(Vec3, Ray)> {
         let refraction_ratio = if hit_record.did_hit_front_face {
             1.0 / self.refractive_index
@@ -75,7 +75,8 @@ impl Material for Glass {
         };
 
         let direction_unit = incoming_ray.direction.unit();
-        let refracted_direction = direction_unit.refract(&hit_record.normal, refraction_ratio);
+        let refracted_direction =
+            direction_unit.refract_or_reflect(&hit_record.normal, refraction_ratio, rng);
 
         Some((
             self.albedo,

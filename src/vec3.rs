@@ -54,8 +54,23 @@ impl Vec3 {
         *self - self.dot(surface_normal) * 2.0 * surface_normal
     }
 
-    pub fn refract(&self, normal: &Vec3, refractive_index: f64) -> Vec3 {
+    pub fn refract_or_reflect(
+        &self,
+        normal: &Vec3,
+        refractive_index: f64,
+        rng: &mut SmallRng,
+    ) -> Vec3 {
         let cos_theta = f64::min((-*self).dot(*normal), 1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+        let cannot_refract = refractive_index * sin_theta > 1.0;
+
+        if cannot_refract
+            || Vec3::reflectance(cos_theta, refractive_index) > rng.gen_range(0.0..1.0)
+        {
+            return self.reflect(*normal);
+        }
+
         let refracted_ray_perpendicular = refractive_index * (*self + cos_theta * *normal);
         let refracted_ray_parallel = -((1.0 - refracted_ray_perpendicular.length_squared())
             .abs()
@@ -63,6 +78,11 @@ impl Vec3 {
             * *normal);
 
         refracted_ray_perpendicular + refracted_ray_parallel
+    }
+
+    fn reflectance(cos_theta: f64, refractive_index: f64) -> f64 {
+        let r0 = ((1.0 - refractive_index) / (1.0 + refractive_index)).powi(2);
+        r0 + (1.0 - r0) * (1.0 - cos_theta).powi(5)
     }
 
     pub fn length_squared(&self) -> f64 {
