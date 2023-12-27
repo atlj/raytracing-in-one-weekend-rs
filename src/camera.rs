@@ -4,7 +4,7 @@ use image::RgbImage;
 use rand::{rngs::SmallRng, Rng};
 
 use crate::{
-    constants::{COLOR_BLACK, COLOR_BLUE, COLOR_WHITE, VIEWPORT_HEIGHT},
+    constants::{COLOR_BLACK, COLOR_BLUE, COLOR_WHITE, FOCAL_LENGTH},
     hittable::Hittable,
     ray::Ray,
     vec3::Vec3,
@@ -12,7 +12,6 @@ use crate::{
 
 pub struct Camera {
     pub hittables: HittableVector,
-    pub focal_length: f64,
     pub width: f64,
     pub height: f64,
     pub reflection_limit: usize,
@@ -20,6 +19,7 @@ pub struct Camera {
     pub output_path: &'static Path,
     pub camera_center: Vec3,
     pub rng: SmallRng,
+    pub vertical_fov: f64,
 }
 
 impl Camera {
@@ -27,7 +27,13 @@ impl Camera {
     where
         F: Fn() -> (),
     {
-        let viewport_width = self.width / self.height * VIEWPORT_HEIGHT;
+        let aspect_ratio = self.width / self.height;
+
+        let theta = self.vertical_fov.to_radians();
+        let h = (theta / 2.0).tan();
+
+        let viewport_height = 2.0 * h * FOCAL_LENGTH;
+        let viewport_width = aspect_ratio * viewport_height;
 
         let viewport_horizontal = Vec3 {
             x: viewport_width,
@@ -37,7 +43,7 @@ impl Camera {
 
         let viewport_vertical = Vec3 {
             x: 0.0,
-            y: -VIEWPORT_HEIGHT,
+            y: -viewport_height,
             z: 0.0,
         };
 
@@ -46,8 +52,8 @@ impl Camera {
 
         let viewport_upperleft_location = Vec3 {
             x: -viewport_width / 2.0,
-            y: VIEWPORT_HEIGHT / 2.0,
-            z: -self.focal_length,
+            y: viewport_height / 2.0,
+            z: -FOCAL_LENGTH,
         };
 
         let mut img = RgbImage::new(self.width as u32, self.height as u32);

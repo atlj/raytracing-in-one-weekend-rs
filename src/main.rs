@@ -24,7 +24,7 @@ const HEIGHT: usize = 225;
 const SAMPLE_COUNT: usize = 50;
 const REFLECTION_LIMIT: usize = 50;
 
-const FOCAL_LENGTH: f64 = 1.0;
+const VERTICAL_FOV: f64 = 75.0;
 
 const SEED: u64 = 234235;
 
@@ -72,10 +72,10 @@ fn main() {
         width: WIDTH as f64,
         height: HEIGHT as f64,
         sample_count: SAMPLE_COUNT,
-        focal_length: FOCAL_LENGTH,
         reflection_limit: REFLECTION_LIMIT,
         output_path: Path::new("output.png"),
         hittables: create_hittables(),
+        vertical_fov: VERTICAL_FOV,
     };
 
     let processed_rays: RefCell<usize> = RefCell::new(0);

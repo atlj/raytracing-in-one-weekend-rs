@@ -1,6 +1,6 @@
 use crate::vec3::Vec3;
 
-pub const VIEWPORT_HEIGHT: f64 = 2.0;
+pub const FOCAL_LENGTH: f64 = 1.0;
 
 pub const COLOR_WHITE: Vec3 = Vec3 {
     x: 1.0,
