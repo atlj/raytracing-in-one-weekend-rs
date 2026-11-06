@@ -4,6 +4,7 @@ use image::RgbImage;
 use rand::{rngs::SmallRng, Rng};
 
 use crate::{
+    aabb::AxisAlignedBoundingBox,
     constants::{COLOR_BLACK, COLOR_BLUE, COLOR_WHITE, FOCAL_LENGTH},
     hittable::Hittable,
     ray::Ray,
@@ -11,7 +12,7 @@ use crate::{
 };
 
 pub struct Camera {
-    pub hittables: HittableVector,
+    pub hittables: HittableList,
     pub width: f64,
     pub height: f64,
     pub reflection_limit: usize,
@@ -116,6 +117,7 @@ impl Camera {
 
         if let Some((hittable_index, closest_hit_record)) = self
             .hittables
+            .1
             .iter()
             .enumerate()
             .flat_map(|(index, hittable)| Some((index, hittable.hit(ray, 0.001..=f64::INFINITY)?)))
@@ -123,7 +125,7 @@ impl Camera {
         {
             // return (closest_hit_record.normal + COLOR_WHITE) / 2.0;
 
-            let material = self.hittables[hittable_index].material();
+            let material = self.hittables.1[hittable_index].material();
 
             if let Some((attenuation, reflected_ray)) =
                 material.scatter(ray, &closest_hit_record, &mut self.rng)
@@ -140,7 +142,7 @@ impl Camera {
     }
 }
 
-pub type HittableVector = Vec<Box<dyn Hittable>>;
+pub type HittableList = (AxisAlignedBoundingBox, Vec<Box<dyn Hittable>>);
 
 fn linear_to_gamma(color: f64) -> f64 {
     color.sqrt()

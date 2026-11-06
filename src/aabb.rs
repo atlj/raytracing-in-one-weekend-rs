@@ -1,9 +1,13 @@
-use std::ops::{Add, RangeInclusive};
+use std::{
+    iter::Sum,
+    ops::{Add, RangeInclusive},
+};
 
 use crate::ray::Ray;
 
 type Interval = RangeInclusive<f64>;
 
+#[derive(Debug, Clone)]
 pub struct AxisAlignedBoundingBox {
     pub x: Interval,
     pub y: Interval,
@@ -11,6 +15,12 @@ pub struct AxisAlignedBoundingBox {
 }
 
 impl AxisAlignedBoundingBox {
+    const ZERO: AxisAlignedBoundingBox = AxisAlignedBoundingBox {
+        x: 0.0..=0.0,
+        y: 0.0..=0.0,
+        z: 0.0..=0.0,
+    };
+
     fn does_hit(&self, ray: &Ray, ray_interval: Interval) -> bool {
         let Some(x_intersection) =
             Self::axis_intersection(ray.origin.x, ray.direction.x, &self.x, &ray_interval)
@@ -83,6 +93,12 @@ impl Add<AxisAlignedBoundingBox> for AxisAlignedBoundingBox {
             z: (Self::min_float(*self.z.start(), *b.z.start()))
                 ..=(Self::max_float(*self.z.end(), *b.z.end())),
         }
+    }
+}
+
+impl Sum for AxisAlignedBoundingBox {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::ZERO, |acc, curr| acc + curr)
     }
 }
 

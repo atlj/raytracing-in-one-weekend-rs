@@ -12,8 +12,9 @@ use kdam::{
 };
 use rand::{rngs::SmallRng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
-    camera::{Camera, HittableVector},
-    hittable::{CenterPosition, Sphere},
+    aabb::AxisAlignedBoundingBox,
+    camera::{Camera, HittableList},
+    hittable::{CenterPosition, Hittable, Sphere},
     material::{Glass, Glossy, Lambertian},
     vec3::Vec3,
 };
@@ -92,7 +93,7 @@ fn main() {
         .write("Render completed".colorize("bold green"));
 }
 
-fn create_hittables() -> HittableVector {
+fn create_hittables() -> HittableList {
     let ground_material = Rc::new(Lambertian {
         albedo: Vec3 {
             x: 0.8,
@@ -136,7 +137,7 @@ fn create_hittables() -> HittableVector {
         refractive_index: 1.5,
     });
 
-    vec![
+    let list: Vec<Box<dyn Hittable>> = vec![
         Box::new(Sphere {
             center_position: CenterPosition::Moving((
                 Vec3 {
@@ -189,5 +190,12 @@ fn create_hittables() -> HittableVector {
             radius: 100.0,
             mat: ground_material.clone(),
         }),
-    ]
+    ];
+
+    let aabb: AxisAlignedBoundingBox = list
+        .iter()
+        .map(|hittable| hittable.get_bounding_box())
+        .sum();
+
+    (aabb, list)
 }
