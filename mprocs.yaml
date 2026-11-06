@@ -1,3 +1,4 @@
 procs:
   build: cargo watch -x run
+  clippy: bacon clippy
   test: cargo watch -x test

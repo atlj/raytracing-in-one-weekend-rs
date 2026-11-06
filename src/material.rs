@@ -57,7 +57,7 @@ impl Material for Glossy {
             direction,
         };
 
-        return Some((self.albedo, reflected_ray));
+        Some((self.albedo, reflected_ray))
     }
 }
 

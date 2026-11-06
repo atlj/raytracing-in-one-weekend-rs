@@ -61,7 +61,8 @@ impl Hittable for Sphere {
             normal: calculated_normal,
             did_hit_front_face,
         };
-        return Some(hit_record);
+
+        Some(hit_record)
     }
 
     fn material(&self) -> &Rc<dyn Material> {

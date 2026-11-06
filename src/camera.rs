@@ -23,9 +23,9 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn render<F>(mut self, on_progress: F) -> ()
+    pub fn render<F>(mut self, on_progress: F)
     where
-        F: Fn() -> (),
+        F: Fn(),
     {
         let aspect_ratio = self.width / self.height;
 
@@ -69,9 +69,9 @@ impl Camera {
             let random_rays: Vec<Ray> = (0..self.sample_count)
                 .map(|_| {
                     let random_x_offset =
-                        pixel_delta_horizontal.x * (self.rng.gen_range(-0.5..=0.5) as f64);
+                        pixel_delta_horizontal.x * self.rng.gen_range(-0.5..=0.5);
                     let random_y_offset =
-                        pixel_delta_vertical.y * (self.rng.gen_range(-0.5..=0.5) as f64);
+                        pixel_delta_vertical.y * self.rng.gen_range(-0.5..=0.5);
 
                     let random_pixel_location = Vec3 {
                         x: pixel_center.x + random_x_offset,
@@ -92,7 +92,7 @@ impl Camera {
                 .iter()
                 .map(|ray| {
                     on_progress();
-                    self.ray_color(&ray, 0)
+                    self.ray_color(ray, 0)
                 })
                 .sum();
 
@@ -127,7 +127,7 @@ impl Camera {
             let material = self.hittables[hittable_index].material();
 
             if let Some((attenuation, reflected_ray)) =
-                material.scatter(&ray, &closest_hit_record, &mut self.rng)
+                material.scatter(ray, &closest_hit_record, &mut self.rng)
             {
                 return attenuation * self.ray_color(&reflected_ray, reflection_count + 1);
             }

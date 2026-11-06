@@ -45,9 +45,9 @@ impl Vec3 {
 
     pub fn is_near_zero(&self) -> bool {
         let really_small_number = 1e-8;
-        return self.x.abs() < really_small_number
+        self.x.abs() < really_small_number
             && self.y.abs() < really_small_number
-            && self.z.abs() < really_small_number;
+            && self.z.abs() < really_small_number
     }
 
     pub fn reflect(&self, surface_normal: Vec3) -> Vec3 {
@@ -102,9 +102,9 @@ impl Vec3 {
     }
 }
 
-impl Into<Rgb<u8>> for Vec3 {
-    fn into(self) -> Rgb<u8> {
-        Rgb([self.x as u8, self.y as u8, self.z as u8])
+impl From<Vec3> for Rgb<u8> {
+    fn from(val: Vec3) -> Self {
+        Rgb([val.x as u8, val.y as u8, val.z as u8])
     }
 }
 
