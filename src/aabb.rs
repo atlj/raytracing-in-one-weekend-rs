@@ -1,13 +1,13 @@
-use std::ops::RangeInclusive;
+use std::ops::{Add, RangeInclusive};
 
 use crate::ray::Ray;
 
 type Interval = RangeInclusive<f64>;
 
 pub struct AxisAlignedBoundingBox {
-    x: Interval,
-    y: Interval,
-    z: Interval,
+    pub x: Interval,
+    pub y: Interval,
+    pub z: Interval,
 }
 
 impl AxisAlignedBoundingBox {
@@ -41,11 +41,11 @@ impl AxisAlignedBoundingBox {
         let intersection_a = (axis_interval.start() - component_origin) * inverse_direction;
         let intersection_b = (axis_interval.end() - component_origin) * inverse_direction;
 
-        let intersection_min = Self::min_f64(intersection_a, intersection_b);
-        let intersection_max = Self::max_f64(intersection_a, intersection_b);
+        let intersection_min = Self::min_float(intersection_a, intersection_b);
+        let intersection_max = Self::max_float(intersection_a, intersection_b);
 
-        let final_intersection_min = Self::max_f64(intersection_min, *valid_interval.start());
-        let final_intersection_max = Self::min_f64(intersection_max, *valid_interval.end());
+        let final_intersection_min = Self::max_float(intersection_min, *valid_interval.start());
+        let final_intersection_max = Self::min_float(intersection_max, *valid_interval.end());
 
         if final_intersection_min >= final_intersection_max {
             return None;
@@ -54,7 +54,7 @@ impl AxisAlignedBoundingBox {
         Some(final_intersection_min..=final_intersection_max)
     }
 
-    fn min_f64(a: f64, b: f64) -> f64 {
+    fn min_float(a: f64, b: f64) -> f64 {
         match a.total_cmp(&b) {
             std::cmp::Ordering::Less => a,
             std::cmp::Ordering::Equal => a,
@@ -62,11 +62,26 @@ impl AxisAlignedBoundingBox {
         }
     }
 
-    fn max_f64(a: f64, b: f64) -> f64 {
+    fn max_float(a: f64, b: f64) -> f64 {
         match a.total_cmp(&b) {
             std::cmp::Ordering::Greater => a,
             std::cmp::Ordering::Equal => a,
             std::cmp::Ordering::Less => b,
+        }
+    }
+}
+
+impl Add<AxisAlignedBoundingBox> for AxisAlignedBoundingBox {
+    type Output = AxisAlignedBoundingBox;
+
+    fn add(self, b: AxisAlignedBoundingBox) -> Self::Output {
+        AxisAlignedBoundingBox {
+            x: (Self::min_float(*self.x.start(), *b.x.start()))
+                ..=(Self::max_float(*self.x.end(), *b.x.end())),
+            y: (Self::min_float(*self.y.start(), *b.y.start()))
+                ..=(Self::max_float(*self.y.end(), *b.y.end())),
+            z: (Self::min_float(*self.z.start(), *b.z.start()))
+                ..=(Self::max_float(*self.z.end(), *b.z.end())),
         }
     }
 }

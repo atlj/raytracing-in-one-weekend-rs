@@ -1,6 +1,6 @@
 use std::{ops::RangeInclusive, rc::Rc};
 
-use crate::{material::Material, ray::Ray, vec3::Vec3};
+use crate::{aabb::AxisAlignedBoundingBox, material::Material, ray::Ray, vec3::Vec3};
 
 pub struct HitRecord {
     pub position: Vec3,
@@ -11,7 +11,7 @@ pub struct HitRecord {
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, multiplier_range: RangeInclusive<f64>) -> Option<HitRecord>;
-
+    fn get_bounding_box(&self) -> AxisAlignedBoundingBox;
     fn material(&self) -> &Rc<dyn Material>;
 }
 
@@ -33,6 +33,16 @@ pub struct Sphere {
     pub center_position: CenterPosition,
     pub radius: f64,
     pub mat: Rc<dyn Material>,
+}
+
+impl Sphere {
+    fn get_bounding_box_at(&self, center: Vec3) -> AxisAlignedBoundingBox {
+        AxisAlignedBoundingBox {
+            x: (center.x - self.radius)..=(center.x + self.radius),
+            y: (center.y - self.radius)..=(center.y + self.radius),
+            z: (center.z - self.radius)..=(center.z + self.radius),
+        }
+    }
 }
 
 impl Hittable for Sphere {
@@ -82,5 +92,14 @@ impl Hittable for Sphere {
 
     fn material(&self) -> &Rc<dyn Material> {
         &self.mat
+    }
+
+    fn get_bounding_box(&self) -> AxisAlignedBoundingBox {
+        match self.center_position {
+            CenterPosition::Static(center) => self.get_bounding_box_at(center),
+            CenterPosition::Moving((start, end)) => {
+                self.get_bounding_box_at(start) + self.get_bounding_box_at(end)
+            }
+        }
     }
 }
