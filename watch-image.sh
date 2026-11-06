@@ -1,1 +1,1 @@
-npx nodemon --ext "*.png" -x "viu output.png"
+bunx nodemon --ext "*.png" -x "viu output.png"
