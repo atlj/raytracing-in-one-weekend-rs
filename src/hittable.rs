@@ -23,7 +23,7 @@ pub enum CenterPosition {
 impl CenterPosition {
     fn at(&self, time: f64) -> Vec3 {
         match self {
-            CenterPosition::Static(static_pos) => static_pos.clone(),
+            CenterPosition::Static(static_pos) => *static_pos,
             CenterPosition::Moving((a, b)) => Vec3::lerp(a, b, time),
         }
     }
