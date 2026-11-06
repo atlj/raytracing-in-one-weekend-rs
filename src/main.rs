@@ -13,7 +13,7 @@ use kdam::{
 use rand::{rngs::SmallRng, SeedableRng};
 use raytracing_in_one_weekend_rust::{
     camera::{Camera, HittableVector},
-    hittable::Sphere,
+    hittable::{CenterPosition, Sphere},
     material::{Glass, Glossy, Lambertian},
     vec3::Vec3,
 };
@@ -138,47 +138,54 @@ fn create_hittables() -> HittableVector {
 
     vec![
         Box::new(Sphere {
-            center_position: Vec3 {
-                x: 0.0,
-                y: 0.0,
-                z: -1.3,
-            },
+            center_position: CenterPosition::Moving((
+                Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: -1.3,
+                },
+                Vec3 {
+                    x: 0.0,
+                    y: 0.2,
+                    z: -1.3,
+                },
+            )),
             radius: 0.5,
             mat: pink_material.clone(),
         }),
         Box::new(Sphere {
-            center_position: Vec3 {
+            center_position: CenterPosition::Static(Vec3 {
                 x: -0.8,
                 y: -0.3,
                 z: -0.8,
-            },
+            }),
             radius: 0.2,
             mat: glass_material.clone(),
         }),
         Box::new(Sphere {
-            center_position: Vec3 {
+            center_position: CenterPosition::Static(Vec3 {
                 x: -2.5,
                 y: 0.3,
                 z: -2.5,
-            },
+            }),
             radius: 0.8,
             mat: gold_material.clone(),
         }),
         Box::new(Sphere {
-            center_position: Vec3 {
+            center_position: CenterPosition::Static(Vec3 {
                 x: 1.3,
                 y: 0.3,
                 z: -1.0,
-            },
+            }),
             radius: 0.8,
             mat: mirror_material.clone(),
         }),
         Box::new(Sphere {
-            center_position: Vec3 {
+            center_position: CenterPosition::Static(Vec3 {
                 x: 0.0,
                 y: -100.5,
                 z: -1.0,
-            },
+            }),
             radius: 100.0,
             mat: ground_material.clone(),
         }),

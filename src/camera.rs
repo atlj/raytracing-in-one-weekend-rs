@@ -66,12 +66,10 @@ impl Camera {
                 + x as f64 * pixel_delta_horizontal
                 + y as f64 * pixel_delta_vertical;
 
-            let random_rays: Vec<Ray> = (0..self.sample_count)
+            let random_rays: Vec<_> = (0..self.sample_count)
                 .map(|_| {
-                    let random_x_offset =
-                        pixel_delta_horizontal.x * self.rng.gen_range(-0.5..=0.5);
-                    let random_y_offset =
-                        pixel_delta_vertical.y * self.rng.gen_range(-0.5..=0.5);
+                    let random_x_offset = pixel_delta_horizontal.x * self.rng.gen_range(-0.5..=0.5);
+                    let random_y_offset = pixel_delta_vertical.y * self.rng.gen_range(-0.5..=0.5);
 
                     let random_pixel_location = Vec3 {
                         x: pixel_center.x + random_x_offset,
@@ -84,6 +82,7 @@ impl Camera {
                     Ray {
                         origin: self.camera_center,
                         direction: ray_direction,
+                        time: self.rng.gen_range(0.0..=1.0),
                     }
                 })
                 .collect();

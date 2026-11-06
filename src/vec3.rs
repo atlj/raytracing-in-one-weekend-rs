@@ -11,6 +11,14 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    pub fn lerp(a: &Vec3, b: &Vec3, factor: f64) -> Vec3 {
+        Vec3 {
+            x: a.x + (b.x - a.x) * factor,
+            y: a.y + (b.y - a.y) * factor,
+            z: a.z + (b.z - a.z) * factor,
+        }
+    }
+
     pub fn random(range: RangeInclusive<f64>, rng: &mut SmallRng) -> Vec3 {
         Vec3 {
             x: rng.gen_range(range.clone()),

@@ -26,7 +26,12 @@ pub struct Glass {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _: &Ray, hit_record: &HitRecord, rng: &mut SmallRng) -> Option<(Vec3, Ray)> {
+    fn scatter(
+        &self,
+        incoming_ray: &Ray,
+        hit_record: &HitRecord,
+        rng: &mut SmallRng,
+    ) -> Option<(Vec3, Ray)> {
         let direction = hit_record.normal + Vec3::random_unit_vector(rng);
 
         let scattered_ray = Ray {
@@ -36,6 +41,7 @@ impl Material for Lambertian {
             } else {
                 hit_record.normal
             },
+            time: incoming_ray.time,
         };
 
         Some((self.albedo, scattered_ray))
@@ -55,6 +61,7 @@ impl Material for Glossy {
         let reflected_ray = Ray {
             origin: hit_record.position,
             direction,
+            time: incoming_ray.time,
         };
 
         Some((self.albedo, reflected_ray))
@@ -83,6 +90,7 @@ impl Material for Glass {
             Ray {
                 origin: hit_record.position,
                 direction: refracted_direction,
+                time: incoming_ray.time,
             },
         ))
     }

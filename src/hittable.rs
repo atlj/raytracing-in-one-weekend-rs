@@ -15,15 +15,30 @@ pub trait Hittable {
     fn material(&self) -> &Rc<dyn Material>;
 }
 
+pub enum CenterPosition {
+    Static(Vec3),
+    Moving((Vec3, Vec3)),
+}
+
+impl CenterPosition {
+    fn at(&self, time: f64) -> Vec3 {
+        match self {
+            CenterPosition::Static(static_pos) => static_pos.clone(),
+            CenterPosition::Moving((a, b)) => Vec3::lerp(a, b, time),
+        }
+    }
+}
+
 pub struct Sphere {
-    pub center_position: Vec3,
+    pub center_position: CenterPosition,
     pub radius: f64,
     pub mat: Rc<dyn Material>,
 }
 
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, multiplier_range: RangeInclusive<f64>) -> Option<HitRecord> {
-        let camera_to_sphere = ray.origin - self.center_position;
+        let current_center = self.center_position.at(ray.time);
+        let camera_to_sphere = ray.origin - current_center;
         let a = ray.direction.length_squared();
         let half_b = camera_to_sphere.dot(ray.direction);
         let c = camera_to_sphere.length_squared() - self.radius * self.radius;
@@ -48,7 +63,7 @@ impl Hittable for Sphere {
 
         let position = ray.at(root);
 
-        let normal = (position - self.center_position) / self.radius;
+        let normal = (position - current_center) / self.radius;
         let (calculated_normal, did_hit_front_face) = if ray.direction.dot(normal) > 0.0 {
             (-normal, false)
         } else {
