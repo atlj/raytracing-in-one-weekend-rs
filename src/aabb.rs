@@ -21,7 +21,7 @@ impl AxisAlignedBoundingBox {
         z: 0.0..=0.0,
     };
 
-    fn does_hit(&self, ray: &Ray, ray_interval: Interval) -> bool {
+    pub fn does_hit(&self, ray: &Ray, ray_interval: Interval) -> bool {
         let Some(x_intersection) =
             Self::axis_intersection(ray.origin.x, ray.direction.x, &self.x, &ray_interval)
         else {

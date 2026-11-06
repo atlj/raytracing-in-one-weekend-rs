@@ -2,8 +2,10 @@ use std::{ops::RangeInclusive, rc::Rc};
 
 use crate::{aabb::AxisAlignedBoundingBox, material::Material, ray::Ray, vec3::Vec3};
 
+mod bounding_volume;
 mod sphere;
 
+pub use bounding_volume::BoundingVolume;
 pub use sphere::{CenterPosition, Sphere};
 
 pub struct HitRecord {
